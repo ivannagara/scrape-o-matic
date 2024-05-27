@@ -1,3 +1,5 @@
+import csv
+import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -74,7 +76,15 @@ def visit_links_and_extract(driver, links, page_load_timeout=10):
 
     return detailed_data
 
+def save_to_csv(data, filename='output.csv'):
+    keys = data[0].keys()
+    with open(filename, 'w', newline='', encoding='utf-8') as output_file:
+        dict_writer = csv.DictWriter(output_file, fieldnames=keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(data)
+
 def main():
+    logging.info("Starting web scraper")
     driver = init_driver()
     query = "berita pelanggaran ham"
     search_query(driver, query)
@@ -86,6 +96,9 @@ def main():
     # Visit each link and extract detailed information
     detailed_data = visit_links_and_extract(driver, links, page_load_timeout=10)
     driver.quit()
+    
+    if detailed_data:
+        save_to_csv(detailed_data, filename='scraped_data.csv')
 
     for data in detailed_data:
         print(f"Link: {data['link']}")
